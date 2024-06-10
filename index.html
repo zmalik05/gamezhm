@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Number Matching Game</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+            rel="stylesheet"
+        />
+        <script type="module">
+            import { selectCriterion, generateNumbers } from "./utils.js";
+
+            document.addEventListener("DOMContentLoaded", () => {
+                const newGameButton =
+                    document.getElementById("new-game-button");
+                const descriptionElement =
+                    document.getElementById("description");
+                const statusElement = document.getElementById("status");
+                const gridElement = document.getElementById("grid");
+
+                let matchingNumbers;
+
+                function startNewGame() {
+                    const selectedCriterion = selectCriterion();
+                    const numbers = generateNumbers(selectedCriterion);
+                    matchingNumbers = numbers.filter((number) =>
+                        selectedCriterion.array.includes(number),
+                    );
+
+                    descriptionElement.textContent = `Select numbers that are ${selectedCriterion.description}`;
+                    statusElement.textContent =
+                        "Click on the matching numbers!";
+                    gridElement.innerHTML = "";
+
+                    numbers.forEach((number, index) => {
+                        const gridItem = document.createElement("div");
+                        gridItem.classList.add(
+                            "p-4",
+                            "min-w-[100px]",
+                            "min-h-[100px]",
+                            "flex",
+                            "items-center",
+                            "justify-center",
+                            "cursor-pointer",
+                            "transition-colors",
+                            "duration-100",
+                            "bg-white",
+                            "border-4",
+                            "border-gray-300",
+                            "hover:bg-gray-200",
+                            "grid-item",
+                        );
+                        gridItem.textContent = number;
+                        gridItem.addEventListener("click", () =>
+                            checkNumber(
+                                number,
+                                gridItem,
+                                selectedCriterion.array,
+                            ),
+                        );
+                        gridElement.appendChild(gridItem);
+                    });
+                }
+
+                function checkNumber(number, element, criterion) {
+                    if (criterion.includes(number)) {
+                        element.classList.remove("hover:bg-gray-200");
+                        element.classList.add("bg-green-400");
+                    } else {
+                        element.classList.remove("hover:bg-gray-200");
+                        element.classList.add("bg-red-400");
+                        setTimeout(() => {
+                            element.classList.remove("bg-red-400");
+                            element.classList.add("hover:bg-gray-200");
+                        }, 300);
+                    }
+                    if (checkWin()) {
+                        statusElement.textContent = "Congratulations! You won!";
+                    }
+                }
+
+                function checkWin() {
+                    const gridItems = document.querySelectorAll(".grid-item");
+                    const correctItems = Array.from(gridItems).filter((item) =>
+                        item.classList.contains("bg-green-400"),
+                    );
+                    return correctItems.length === matchingNumbers.length;
+                }
+
+                newGameButton.addEventListener("click", startNewGame);
+                startNewGame();
+            });
+        </script>
+    </head>
+    <body
+        class="flex flex-col items-center justify-center min-h-screen bg-gray-200"
+    >
+        <div class="text-center w-full max-w-screen-lg">
+            <h1 class="text-3xl font-bold mb-4">Number Matching Game</h1>
+            <button
+                id="new-game-button"
+                class="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
+            >
+                Start New Game
+            </button>
+            <div id="description" class="mb-4"></div>
+            <div id="status" class="mb-4 text-xl">
+                Click on the matching numbers!
+            </div>
+            <div
+                id="grid"
+                class="grid grid-cols-4 gap-2 bg-gray-300 p-4 rounded-lg min-h-[400px]"
+            ></div>
+        </div>
+    </body>
+</html>
